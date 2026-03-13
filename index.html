@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/rmc-ai-manager/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="분당서울대학교병원 재생의학센터 AI 통합 관리 시스템">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <!-- PWA: iOS -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RMC Manager">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
+
+  <!-- PWA: Android -->
+  <meta name="theme-color" content="#1565C0">
+  <link rel="icon" type="image/png" href="icons/Icon-192.png"/>
+  <link rel="manifest" href="manifest.json">
+
+  <title>RMC Ai Manager</title>
+
+  <style>
+    body { margin: 0; padding: 0; background: #1565C0; overflow: hidden; }
+    #loading-screen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999; color: white; transition: opacity 0.5s ease;
+    }
+    #loading-screen img {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: white; padding: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    #loading-screen h2 {
+      font-family: sans-serif; font-size: 22px; font-weight: bold;
+      margin: 16px 0 4px; letter-spacing: 1px;
+    }
+    #loading-screen p { font-family: sans-serif; font-size: 12px; opacity: 0.7; margin: 0; }
+    #loading-bar {
+      width: 200px; height: 3px; background: rgba(255,255,255,0.3);
+      border-radius: 2px; margin-top: 24px; overflow: hidden;
+    }
+    #loading-bar-fill {
+      width: 0%; height: 100%; background: rgba(255,255,255,0.9);
+      border-radius: 2px; animation: load 4s ease forwards;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    @keyframes load  { 0%{width:0%} 80%{width:85%} 100%{width:95%} }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <img src="icons/Icon-192.png" alt="RMC Logo" onerror="this.style.display='none'">
+    <h2>RMC Ai Manager</h2>
+    <p>분당서울대학교병원 재생의학센터</p>
+    <div id="loading-bar"><div id="loading-bar-fill"></div></div>
+  </div>
+
+  <script>
+    // ── 로딩 화면 제거 ──
+    var _loadingRemoved = false;
+    function removeLoadingScreen() {
+      if (_loadingRemoved) return;
+      _loadingRemoved = true;
+      var el = document.getElementById('loading-screen');
+      if (!el) return;
+      el.style.opacity = '0';
+      setTimeout(function(){ if(el&&el.parentNode) el.parentNode.removeChild(el); }, 500);
+    }
+    window.addEventListener('flutter-first-frame', removeLoadingScreen);
+    setTimeout(removeLoadingScreen, 15000); // 최대 15초 폴백
+
+    // ── Service Worker: Flutter 내장 SW 완전 무시, 우리 sw.js만 사용 ──
+    if ('serviceWorker' in navigator) {
+      var _refreshing = false;
+
+      // SW_UPDATED 메시지 수신 → 한 번만 새로고침
+      navigator.serviceWorker.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'SW_UPDATED') {
+          if (_refreshing) return;
+          _refreshing = true;
+          window.location.reload();
+        }
+      });
+
+      // 우리 sw.js 등록
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then(function(reg) {
+          // 이미 대기 중인 새 버전 → 즉시 활성화
+          if (reg.waiting) {
+            reg.waiting.postMessage('skipWaiting');
+          }
+          // 새 버전 설치 감지
+          reg.addEventListener('updatefound', function() {
+            var newSW = reg.installing;
+            if (!newSW) return;
+            newSW.addEventListener('statechange', function() {
+              if (newSW.state === 'installed') {
+                // 기존 SW가 있을 때만 교체 (첫 설치 제외)
+                if (navigator.serviceWorker.controller) {
+                  newSW.postMessage('skipWaiting');
+                }
+              }
+            });
+          });
+        })
+        .catch(function(err) {
+          // SW 등록 실패해도 앱은 정상 실행
+          console.warn('[SW] 등록 실패 (앱은 정상 실행):', err);
+        });
+    }
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

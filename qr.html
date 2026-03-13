@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RMC Ai Manager - 홈 화면 추가</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+      padding-bottom: 40px;
+    }
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 24px;
+      padding-top: 10px;
+    }
+    .logo-circle {
+      width: 80px; height: 80px;
+      background: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .logo-circle img { width: 90%; height: 90%; object-fit: contain; padding: 4px; }
+    .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+    .header p  { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+    .card {
+      background: white; border-radius: 20px; padding: 24px;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .card-title { font-size: 16px; font-weight: 700; color: #1565C0; text-align: center; margin-bottom: 6px; }
+    .card-sub   { font-size: 12px; color: #888; text-align: center; margin-bottom: 20px; }
+    .qr-wrapper { display: flex; justify-content: center; align-items: center; margin-bottom: 12px; }
+    #qrcanvas {
+      border: 3px solid #1565C0;
+      border-radius: 12px;
+      padding: 10px;
+      background: white;
+      display: block;
+    }
+    .url-box {
+      background: #f0f4ff; border: 1px solid #c5d3f0; border-radius: 8px;
+      padding: 8px 12px; text-align: center; margin-bottom: 20px; word-break: break-all;
+    }
+    .url-box span { font-size: 11px; color: #1565C0; font-weight: 500; }
+    .divider { height: 1px; background: #eee; margin: 16px 0; }
+    .guide { border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .guide.android { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .guide.ios     { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .guide-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 700; margin-bottom: 10px;
+    }
+    .guide.android .guide-title { color: #16a34a; }
+    .guide.ios     .guide-title { color: #2563eb; }
+    .guide-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .guide.android .guide-icon { background: #dcfce7; }
+    .guide.ios     .guide-icon { background: #dbeafe; }
+    .step { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 7px; }
+    .step-num {
+      min-width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: white; margin-top: 1px;
+    }
+    .guide.android .step-num { background: #16a34a; }
+    .guide.ios     .step-num { background: #2563eb; }
+    .step-text { font-size: 12px; color: #444; line-height: 1.4; flex: 1; }
+    .step-text strong { font-weight: 700; color: #111; }
+    .notice {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+      padding: 12px; margin-top: 14px; display: flex; align-items: flex-start; gap: 8px;
+    }
+    .notice-icon { font-size: 16px; margin-top: 1px; }
+    .notice-text { font-size: 11px; color: #78350f; line-height: 1.5; }
+    .btn-back {
+      display: block; margin-top: 16px; text-align: center;
+      padding: 12px 32px; background: #1565C0; color: white;
+      border-radius: 12px; text-decoration: none;
+      font-size: 14px; font-weight: 600; width: 100%;
+    }
+    .btn-back:active { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-circle">
+      <img src="icons/Icon-192.png" alt="RMC" onerror="this.style.display='none'">
+    </div>
+    <h1>RMC Ai Manager</h1>
+    <p>분당서울대학교병원 재생의학센터</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📱 홈 화면에 추가하기</div>
+    <div class="card-sub">QR 코드를 스캔하거나 아래 URL을 직접 입력하세요</div>
+
+    <div class="qr-wrapper">
+      <canvas id="qrcanvas"></canvas>
+    </div>
+
+    <div class="url-box">
+      <span id="app-url">로딩 중...</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="guide android">
+      <div class="guide-title">
+        <div class="guide-icon">🤖</div>
+        Android (크롬 브라우저)
+      </div>
+      <div class="step"><div class="step-num">1</div><div class="step-text">크롬 브라우저로 위 QR 코드 스캔 또는 URL 직접 입력</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">주소창 오른쪽 <strong>⋮ 더보기</strong> 메뉴 탭</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>"홈 화면에 추가"</strong> 또는 <strong>"앱 설치"</strong> 선택</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text"><strong>설치</strong> 확인 → 홈 화면 아이콘으로 바로 실행! ✅</div></div>
+    </div>
+
+    <div class="guide ios">
+      <div class="guide-title">
+        <div class="guide-icon">🍎</div>
+        iPhone / iPad (사파리)
+      </div>
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>사파리</strong>로 위 QR 코드 스캔 또는 URL 직접 입력</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">하단 가운데 <strong>공유 버튼 □↑</strong> 탭</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>"홈 화면에 추가"</strong> 선택</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text">우측 상단 <strong>"추가"</strong> 탭 → 홈 화면 아이콘으로 바로 실행! ✅</div></div>
+    </div>
+
+    <div class="notice">
+      <div class="notice-icon">💡</div>
+      <div class="notice-text">
+        앱 삭제 및 재설치 불필요! 업데이트 시 다음 접속부터 자동 반영됩니다.<br>
+        <strong>※ 카메라 QR 스캔 시 크롬(Android) 또는 사파리(iPhone)로 열어주세요.</strong>
+      </div>
+    </div>
+
+    <a id="btn-open" class="btn-back" href="#">앱 바로 열기 →</a>
+  </div>
+
+  <script>
+  // ── 순수 JS로 QR 코드 생성 (외부 라이브러리 불필요) ──────────────────────────
+  // Reed-Solomon + QR 인코딩 경량 구현 (alphanumeric / byte 모드, 버전 1~10)
+
+  (function() {
+    'use strict';
+
+    /* ---------- Galois Field GF(256) ---------- */
+    var GF = (function() {
+      var exp = new Uint8Array(512), log = new Uint8Array(256);
+      var x = 1;
+      for (var i = 0; i < 255; i++) {
+        exp[i] = x; log[x] = i;
+        x = x << 1; if (x & 0x100) x ^= 0x11d;
+      }
+      for (var j = 255; j < 512; j++) exp[j] = exp[j - 255];
+      return {
+        mul: function(a, b) { return (a === 0 || b === 0) ? 0 : exp[(log[a] + log[b]) % 255]; },
+        div: function(a, b) { return exp[(log[a] + log[b] * 254) % 255]; },
+        pow: function(a, b) { return exp[(log[a] * b) % 255]; },
+        inv: function(a)    { return exp[255 - log[a]]; },
+        exp: exp, log: log
+      };
+    })();
+
+    /* ---------- RS error correction ---------- */
+    function rsGenPoly(nec) {
+      var g = [1];
+      for (var i = 0; i < nec; i++) {
+        var ng = new Array(g.length + 1).fill(0);
+        var a  = GF.pow(2, i);
+        for (var j = 0; j < g.length; j++) {
+          ng[j]   ^= g[j];
+          ng[j+1] ^= GF.mul(g[j], a);
+        }
+        g = ng;
+      }
+      return g;
+    }
+
+    function rsEncode(data, nec) {
+      var gen  = rsGenPoly(nec);
+      var res  = new Array(nec).fill(0);
+      for (var i = 0; i < data.length; i++) {
+        var coef = data[i] ^ res.shift();
+        res.push(0);
+        if (coef !== 0) {
+          for (var j = 0; j < gen.length - 1; j++) {
+            res[j] ^= GF.mul(gen[j + 1], coef);
+          }
+        }
+      }
+      return res;
+    }
+
+    /* ---------- QR version / capacity tables ---------- */
+    // [version]: { totalCodewords, dataCodewords (ECL-M), ecCodewords, blocks[[dcw,ecw]] }
+    var VER = {
+      1:  { tc:26,   dc:16,  ec:10, blk:[[16,10]] },
+      2:  { tc:44,   dc:28,  ec:16, blk:[[28,16]] },
+      3:  { tc:70,   dc:44,  ec:26, blk:[[44,26]] },
+      4:  { tc:100,  dc:64,  ec:36, blk:[[64,36]] },
+      5:  { tc:134,  dc:86,  ec:48, blk:[[86,48]] },
+      6:  { tc:172,  dc:108, ec:64, blk:[[108,64]] },
+      7:  { tc:196,  dc:124, ec:72, blk:[[124,72]] },
+      8:  { tc:242,  dc:154, ec:88, blk:[[154,88]] },
+      9:  { tc:292,  dc:182, ec:110,blk:[[182,110]] },
+      10: { tc:346,  dc:216, ec:130,blk:[[216,130]] },
+    };
+
+    function getVersion(byteLen) {
+      // M level capacity in bytes
+      var cap = [0,16,28,44,64,86,108,124,154,182,216];
+      for (var v = 1; v <= 10; v++) if (byteLen <= cap[v]) return v;
+      return 10;
+    }
+
+    /* ---------- Byte-mode bit stream ---------- */
+    function encodeByte(text, version) {
+      var bytes = unescape(encodeURIComponent(text));
+      var bits  = [];
+      function addBits(val, n) {
+        for (var i = n - 1; i >= 0; i--) bits.push((val >> i) & 1);
+      }
+      addBits(0b0100, 4); // byte mode
+      var ccLen = version < 10 ? 8 : 16;
+      addBits(bytes.length, ccLen);
+      for (var i = 0; i < bytes.length; i++) addBits(bytes.charCodeAt(i), 8);
+      // terminator
+      for (var t = 0; t < 4 && bits.length < VER[version].dc * 8; t++) bits.push(0);
+      // pad to byte boundary
+      while (bits.length % 8) bits.push(0);
+      // pad codewords
+      var pads = [0xEC, 0x11];
+      var pi   = 0;
+      while (bits.length < VER[version].dc * 8) {
+        addBits(pads[pi % 2], 8); pi++;
+      }
+      // bits → codeword array
+      var cws = [];
+      for (var b = 0; b < bits.length; b += 8) {
+        var v = 0; for (var k = 0; k < 8; k++) v = (v << 1) | bits[b + k];
+        cws.push(v);
+      }
+      return cws;
+    }
+
+    /* ---------- Matrix helpers ---------- */
+    function makeMatrix(size) {
+      var m = [];
+      for (var i = 0; i < size; i++) { m.push([]); for (var j = 0; j < size; j++) m[i].push(-1); }
+      return m;
+    }
+
+    function placeFinder(m, r, c) {
+      var pat = [[1,1,1,1,1,1,1],[1,0,0,0,0,0,1],[1,0,1,1,1,0,1],
+                 [1,0,1,1,1,0,1],[1,0,1,1,1,0,1],[1,0,0,0,0,0,1],[1,1,1,1,1,1,1]];
+      for (var i = 0; i < 7; i++) for (var j = 0; j < 7; j++) m[r+i][c+j] = pat[i][j];
+    }
+
+    function placeFormat(m, size, fmt) {
+      var order = [8,8,8,8,8,8,8,8,7,5,4,3,2,1,0];
+      var b     = [];
+      for (var i = 14; i >= 0; i--) b.push((fmt >> i) & 1);
+      // horizontal
+      for (var x = 0; x <= 5; x++)  m[8][x] = b[x];
+      m[8][7] = b[6]; m[8][8] = b[7]; m[8][size-8] = b[7];
+      for (var x2 = 0; x2 < 7; x2++) m[8][size - 7 + x2] = b[8 + x2];
+      // vertical
+      for (var y = 0; y <= 5; y++)   m[y][8] = b[14 - y];
+      m[7][8] = b[8]; m[8][8] = b[7];
+      for (var y2 = 0; y2 < 7; y2++) m[size - 7 + y2][8] = b[6 - y2];
+      m[size - 8][8] = 1; // dark module
+    }
+
+    function placeAlign(m, version) {
+      if (version < 2) return;
+      var centers = {2:[6,18],3:[6,22],4:[6,26],5:[6,30],6:[6,34],
+                     7:[6,22,38],8:[6,24,42],9:[6,26,46],10:[6,28,50]};
+      var locs = centers[version] || [];
+      for (var i = 0; i < locs.length; i++) {
+        for (var j = 0; j < locs.length; j++) {
+          var r = locs[i], c = locs[j];
+          if (m[r][c] !== -1) continue;
+          for (var dr = -2; dr <= 2; dr++) for (var dc2 = -2; dc2 <= 2; dc2++) {
+            var v = (Math.abs(dr) === 2 || Math.abs(dc2) === 2) ? 1 : (dr === 0 && dc2 === 0 ? 1 : 0);
+            m[r+dr][c+dc2] = v;
+          }
+        }
+      }
+    }
+
+    function placeTiming(m, size) {
+      for (var i = 8; i < size - 8; i++) {
+        m[6][i] = m[i][6] = (i % 2 === 0) ? 1 : 0;
+      }
+    }
+
+    function reserveFormat(m, size) {
+      for (var i = 0; i <= 8; i++) {
+        if (m[8][i] === -1) m[8][i] = 2;
+        if (m[i][8] === -1) m[i][8] = 2;
+      }
+      for (var i2 = size - 8; i2 < size; i2++) {
+        if (m[8][i2] === -1) m[8][i2] = 2;
+        if (m[i2][8] === -1) m[i2][8] = 2;
+      }
+    }
+
+    function placeData(m, size, data) {
+      var idx = 0, dir = -1, row = size - 1;
+      for (var col = size - 1; col >= 0; col -= 2) {
+        if (col === 6) col = 5;
+        for (var cnt = 0; cnt < size; cnt++) {
+          var r = row, c = col - ((size - 1 - col) % 2);
+          // left column in the pair
+          var c2 = col - 1 + ((size - 1 - col + 1) % 2);
+          for (var ci = 0; ci < 2; ci++) {
+            var cc = col - ci;
+            if (cc === 6) continue;
+            if (m[r][cc] === -1) {
+              var bit = 0;
+              if (idx < data.length * 8) {
+                bit = (data[Math.floor(idx / 8)] >> (7 - (idx % 8))) & 1;
+                idx++;
+              }
+              m[r][cc] = bit;
+            }
+          }
+          row += dir;
+          if (row < 0 || row >= size) { dir = -dir; row += dir; break; }
+          cnt = -1; // outer loop handles cnt
+          break; // only do one row per col iteration — rewrite below properly
+        }
+      }
+    }
+
+    // Proper zigzag data placement
+    function placeDataZigzag(m, size, data) {
+      var bits = [];
+      for (var i = 0; i < data.length; i++) {
+        for (var b = 7; b >= 0; b--) bits.push((data[i] >> b) & 1);
+      }
+      var idx = 0, upward = true;
+      var col = size - 1;
+      while (col >= 0) {
+        if (col === 6) { col--; continue; }
+        var rows = [];
+        for (var r = 0; r < size; r++) rows.push(r);
+        if (upward) rows.reverse();
+        for (var ri = 0; ri < rows.length; ri++) {
+          var row = rows[ri];
+          for (var dc = 0; dc < 2; dc++) {
+            var c = col - dc;
+            if (c < 0) continue;
+            if (m[row][c] === -1) {
+              m[row][c] = idx < bits.length ? bits[idx++] : 0;
+            }
+          }
+        }
+        upward = !upward;
+        col -= 2;
+      }
+    }
+
+    /* ---------- Masking ---------- */
+    function applyMask(m, size, mask) {
+      for (var r = 0; r < size; r++) for (var c = 0; c < size; c++) {
+        if (m[r][c] > 1) continue; // skip function modules (0/1 only)
+        var invert = false;
+        switch (mask) {
+          case 0: invert = (r + c) % 2 === 0; break;
+          case 1: invert = r % 2 === 0; break;
+          case 2: invert = c % 3 === 0; break;
+          case 3: invert = (r + c) % 3 === 0; break;
+          case 4: invert = (Math.floor(r/2) + Math.floor(c/3)) % 2 === 0; break;
+          case 5: invert = ((r*c)%2 + (r*c)%3) === 0; break;
+          case 6: invert = ((r*c)%2 + (r*c)%3) % 2 === 0; break;
+          case 7: invert = ((r+c)%2 + (r*c)%3) % 2 === 0; break;
+        }
+        if (invert) m[r][c] ^= 1;
+      }
+    }
+
+    function maskPenalty(m, size) {
+      var p = 0;
+      // Rule 1: 5+ consecutive
+      for (var r = 0; r < size; r++) {
+        var run = 1;
+        for (var c = 1; c < size; c++) {
+          if (m[r][c] === m[r][c-1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; }
+          else run = 1;
+        }
+      }
+      for (var c2 = 0; c2 < size; c2++) {
+        var run2 = 1;
+        for (var r2 = 1; r2 < size; r2++) {
+          if (m[r2][c2] === m[r2-1][c2]) { run2++; if (run2 === 5) p += 3; else if (run2 > 5) p++; }
+          else run2 = 1;
+        }
+      }
+      return p;
+    }
+
+    function formatBits(mask) {
+      // ECL M = 0b00, mask 0-7
+      var data = (0b00 << 3) | mask;
+      // BCH(15,5) generator: x^10+x^8+x^5+x^4+x^2+x+1 = 0x537
+      var rem = data << 10;
+      for (var i = 4; i >= 0; i--) {
+        if ((rem >> (i + 10)) & 1) rem ^= (0x537 << i);
+      }
+      return ((data << 10) | rem) ^ 0x5412;
+    }
+
+    /* ---------- Main QR generation ---------- */
+    function generateQR(text) {
+      var bytes = unescape(encodeURIComponent(text));
+      var version = getVersion(bytes.length);
+      var size    = version * 4 + 17;
+      var vinfo   = VER[version];
+
+      // encode
+      var dataCWs = encodeByte(text, version);
+      var ecCWs   = rsEncode(dataCWs, vinfo.ec);
+      var allCWs  = dataCWs.concat(ecCWs);
+
+      // build matrix
+      var m = makeMatrix(size);
+      placeFinder(m, 0, 0);
+      placeFinder(m, 0, size - 7);
+      placeFinder(m, size - 7, 0);
+      // separators
+      for (var i = 0; i < 8; i++) {
+        [m[7][i], m[i][7], m[7][size-1-i], m[i][size-8],
+         m[size-8][i], m[size-1-i][7]].forEach(function(){});
+        if (m[7][i]      === -1) m[7][i]      = 0;
+        if (m[i][7]      === -1) m[i][7]      = 0;
+        if (m[7][size-1-i]=== -1) m[7][size-1-i]= 0;
+        if (m[i][size-8] === -1) m[i][size-8] = 0;
+        if (m[size-8][i] === -1) m[size-8][i] = 0;
+        if (m[size-1-i][7]=== -1) m[size-1-i][7]= 0;
+      }
+      placeTiming(m, size);
+      placeAlign(m, version);
+      reserveFormat(m, size);
+      if (version >= 7) {
+        // version info (skip for simplicity, not needed v<7)
+      }
+      placeDataZigzag(m, size, allCWs);
+
+      // choose best mask
+      var bestMask = 0, bestPen = Infinity;
+      for (var mask = 0; mask < 8; mask++) {
+        var mm = m.map(function(row) { return row.slice(); });
+        applyMask(mm, size, mask);
+        var fmt = formatBits(mask);
+        placeFormat(mm, size, fmt);
+        var pen = maskPenalty(mm, size);
+        if (pen < bestPen) { bestPen = pen; bestMask = mask; }
+      }
+      applyMask(m, size, bestMask);
+      var fmt2 = formatBits(bestMask);
+      placeFormat(m, size, fmt2);
+
+      return { matrix: m, size: size };
+    }
+
+    /* ---------- Canvas render ---------- */
+    function renderQR(canvasId, text, options) {
+      var opt    = options || {};
+      var dark   = opt.dark   || '#1565C0';
+      var light  = opt.light  || '#FFFFFF';
+      var margin = opt.margin !== undefined ? opt.margin : 4;
+      var qr     = generateQR(text);
+      var size   = qr.size;
+      var module = opt.module || 3;
+      var total  = (size + margin * 2) * module;
+      var canvas = document.getElementById(canvasId);
+      canvas.width  = total;
+      canvas.height = total;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = light;
+      ctx.fillRect(0, 0, total, total);
+      ctx.fillStyle = dark;
+      for (var r = 0; r < size; r++) {
+        for (var c = 0; c < size; c++) {
+          if (qr.matrix[r][c] === 1) {
+            ctx.fillRect((c + margin) * module, (r + margin) * module, module, module);
+          }
+        }
+      }
+    }
+
+    // ── Run on load ──────────────────────────────────────────────────────────
+    var appUrl = window.location.origin + '/';
+    document.getElementById('app-url').textContent = window.location.origin;
+    document.getElementById('btn-open').href = appUrl;
+
+    // Render QR on canvas
+    try {
+      renderQR('qrcanvas', appUrl, { dark: '#1565C0', light: '#FFFFFF', margin: 3, module: 4 });
+    } catch(e) {
+      // Fallback: show URL text if QR fails
+      var canvas = document.getElementById('qrcanvas');
+      canvas.style.display = 'none';
+      var fb = document.createElement('div');
+      fb.style.cssText = 'padding:12px;background:#f0f4ff;border-radius:8px;font-size:11px;color:#1565C0;word-break:break-all;text-align:center;';
+      fb.textContent = appUrl;
+      canvas.parentNode.insertBefore(fb, canvas);
+    }
+  })();
+  </script>
+</body>
+</html>

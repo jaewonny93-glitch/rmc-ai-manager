@@ -1,0 +1,49 @@
+{
+    "name": "RMC Ai Manager",
+    "short_name": "RMC Manager",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#1565C0",
+    "theme_color": "#1565C0",
+    "description": "분당서울대학교병원 재생의학센터 AI 통합 관리 시스템",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "scope": "/",
+    "lang": "ko",
+    "categories": ["medical", "productivity", "utilities"],
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [],
+    "related_applications": [],
+    "shortcuts": [
+        {
+            "name": "출퇴근 QR",
+            "short_name": "QR",
+            "description": "QR 출퇴근 스캔",
+            "url": "/?shortcut=attendance",
+            "icons": [{"src": "icons/Icon-192.png", "sizes": "192x192"}]
+        }
+    ]
+}
